@@ -35,6 +35,29 @@ Add the following hosts:
 127.0.0.1       rapid.group2.dev.example.com    mineit.group2.dev.example.com
 #+end_example
 
+* Add users
+
+Sample user accounts are set in =services/authelia/users_database.yml=.
+
+Follow the sample layout:
+
+#+begin_example
+  aperson:
+    disabled: false
+    displayname: "A Person"
+    # password is 'test'
+    password: "$argon2id$v=19$m=65536,t=3,p=4$8Duc6xBxO6rFgGvCL8DNLw$mi3c2+PbD5RG9Q6K7ORxls2uuNx8u//+5VdAUEgWn0Q"
+    email: person@example.com
+    groups:
+      - people
+      - admin
+#+end_example
+
+Generate hashed password information with the following command:
+#+begin_src shell
+  docker run authelia/authelia authelia crypto hash generate argon2 --password $PASSWORD | sed 's/Digest: //g'
+#+end_src
+
 * Start/stop/observe the environment
 ** Run this ONLY ONCE
 Initially you will need to set up a couple of Docker related things.  Firstly the internal network that containers will use to communicate with each other:
@@ -73,3 +96,5 @@ If you want to play around with the configuration the following files will be of
 - =.env= :: Environment variables used by ~docker-compose~
 - =docker-compose.yml= :: Configuration for the various tools that are run
 - =services/homer/config.yml= :: Configuration for the homepage
+- =services/authelia/users_database.yml= :: Add users for the demo
+- =services/authelia/configuration.yml= :: Configure access to the various hosts
