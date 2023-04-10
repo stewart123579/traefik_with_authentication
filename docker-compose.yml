@@ -1,0 +1,155 @@
+# $ docker network create traefik-public
+# $ docker volume create --name=homer_assets
+
+version: '3.7'
+
+services:
+
+  traefik:
+    image: "traefik:latest"
+    container_name: traefik
+    env_file:
+      - env-PUBLIC
+    command:
+      # Try to enable this if something isn't working. Chances are, Traefik will tell you why
+      # Be careful on production as it exposes the traffic you might not want to expose
+      --api=true
+      --api.insecure=true
+      --log.level=DEBUG
+
+      --entrypoints.http.address=:80
+      --entrypoints.https.address=:443
+
+      --providers.docker=true
+
+      --api=true
+
+      # HTTPS settings
+      # --certificatesresolvers.letsencrypt.acme.dnschallenge=true
+      # --certificatesresolvers.letsencrypt.acme.dnschallenge.provider=dreamhost
+      # --certificatesresolvers.letsencrypt.acme.email=${EMAIL}
+      # --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+    labels:
+      # Redirect all HTTP traffic to HTTPS
+      - traefik.http.routers.to-https.rule=HostRegexp(`{host:.+}`)
+      - traefik.http.routers.to-https.entrypoints=http
+      - traefik.http.routers.to-https.middlewares=to-https
+
+      - traefik.http.routers.traefik.rule=Host(`traefik.${DEV_DOMAIN}`)
+      - traefik.http.routers.traefik.entrypoints=https
+      - traefik.http.routers.traefik.service=api@internal
+      - traefik.http.routers.traefik.tls=true
+      - traefik.http.routers.traefik.tls.options=default
+      - traefik.http.routers.traefik.middlewares=auth
+      # # Uncomment fetch Let's Encrypt certificates
+      # # Make sure you set up DNS records and they point to your IP
+      # - traefik.http.routers.traefik-https.tls.domains[0].main=${DOMAIN}
+      # - traefik.http.routers.traefik-https.tls.domains[0].sans=*.${DOMAIN}
+      # - traefik.http.routers.traefik-https.tls.certresolver=letsencrypt
+
+      - traefik.http.middlewares.to-https.redirectscheme.scheme=https
+      - traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD_HASH}
+
+      # Use the traefik-public network (declared below)
+      - traefik.docker.network=traefik-public
+    networks:
+      - traefik-public
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+      # # Local port - DEBUGGING ONLY
+      - 8080:8080
+    volumes:
+      # - .data/letsencrypt:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+
+  homer:
+    image: "b4bz/homer:latest"
+    container_name: "homer"
+    env_file:
+      - env-PUBLIC
+    volumes:
+      - "homer_assets:/www/assets"
+      - "./services/homer/config.yml:/www/assets/config.yml:ro"
+      - "./services/homer/tools:/www/assets/tools:ro"
+    dns:
+      - 192.168.1.50
+      - 192.168.1.51
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.homer.rule=Host(`${DEV_DOMAIN}`)
+      - traefik.http.routers.homer.entrypoints=https
+      - traefik.http.routers.homer.tls=true
+      - traefik.docker.network=traefik-public
+    networks:
+      - traefik-public
+    restart: unless-stopped
+
+
+  tool1:
+    image: "brndnmtthws/nginx-echo-headers"
+    container_name: "tool1"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.tool1.rule=Host(`tool1.${GROUP1_DOMAIN}`)
+      - traefik.http.routers.tool1.entrypoints=https
+      - traefik.http.routers.tool1.tls=true
+      - traefik.docker.network=traefik-public
+    networks:
+      - traefik-public
+
+
+  tool2:
+    image: "httpd:latest"
+    container_name: "tool2"
+    volumes:
+      - "./services/examples/tool2.html:/usr/local/apache2/htdocs/index.html:ro"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.tool2.rule=Host(`tool2.${GROUP1_DOMAIN}`)
+      - traefik.http.routers.tool2.entrypoints=https
+      - traefik.http.routers.tool2.tls=true
+      - traefik.docker.network=traefik-public
+    networks:
+      - traefik-public
+
+
+  rapid:
+    image: "httpd:latest"
+    container_name: "rapid"
+    volumes:
+      - "./services/examples/rapid.html:/usr/local/apache2/htdocs/index.html:ro"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.rapid.rule=Host(`rapid.${GROUP2_DOMAIN}`)
+      - traefik.http.routers.rapid.entrypoints=https
+      - traefik.http.routers.rapid.tls=true
+      - traefik.docker.network=traefik-public
+    networks:
+      - traefik-public
+
+
+  mineit:
+    image: "httpd:latest"
+    container_name: "mineit"
+    volumes:
+      - "./services/examples/mineit.html:/usr/local/apache2/htdocs/index.html:ro"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.mineit.rule=Host(`mineit.${GROUP2_DOMAIN}`)
+      - traefik.http.routers.mineit.entrypoints=https
+      - traefik.http.routers.mineit.tls=true
+      - traefik.docker.network=traefik-public
+    networks:
+      - traefik-public
+
+volumes:
+  homer_assets:
+    external: true
+
+
+networks:
+  traefik-public:
+    external: true

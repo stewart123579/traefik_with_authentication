@@ -1,0 +1,11 @@
+# This is a PUBLIC file
+
+TZ="Australia/Sydney"
+GENERIC_TIMEZONE="Australia/Sydney"
+
+# Get this from the `id` command
+PUID=1000
+PGID=1000
+
+UID=1000
+GID=1000
