@@ -1,1 +1,3 @@
 *~
+/services/authelia/db.sqlite3
+/services/authelia/notification.txt

@@ -1,10 +1,10 @@
-#+TITLE: Serving solutions
+#+TITLE: Serving solutions with authentication
 
-This is a quick example of how to serve solutions, i.e. what you might call apps or SaaS tools.
+This is a quick example of how to serve solutions with authentication, i.e. what you might call apps or SaaS tools.
 
 The intent is to have a common landing page, but capabilities provided by different groups, be they divisions in a company, or just conceptual (i.e. media, gaming) for a home network.
 
-I'll be adding [[https://www.authelia.com/][Authelia]] to provide authentication in a subsequent commit.
+This is using [[https://www.authelia.com/][Authelia]] to provide authentication.  To use another SSO tool, you will need to edit the [[https://traefik.io/][Traefik]] configurations.
 
 * The site
 Once you have this running visit https://dev.example.com/
@@ -13,6 +13,7 @@ Once you have this running visit https://dev.example.com/
 This setup uses the following tools.  However, don't worry, the *Docker containers* are automatically downloaded, nothing is installed on your machine.
 
 - [[https://traefik.io/][Traefik]] :: Traefik is a leading modern reverse proxy and load balancer that makes deploying microservices easy
+- [[https://www.authelia.com/][Authelia]] :: The Single Sign-On Multi-Factor portal for web apps
 - [[https://github.com/bastienwirtz/homer][Homer]] :: A dead simple static HOMepage for your servER
 - [[https://github.com/brndnmtthws/nginx-echo-headers][nginx-echo-headers]] :: Return all HTTP request headers and body to the client
 - [[https://hub.docker.com/_/httpd/][httpd]] :: The Apache HTTP Server Project
@@ -27,7 +28,7 @@ Add the following hosts:
 
 #+begin_example
 # Admin related sites
-127.0.0.1       dev.example.com                 traefik.dev.example.com
+127.0.0.1       dev.example.com                 traefik.dev.example.com         authelia.dev.example.com
 # Tools managed by Group 1
 127.0.0.1       tool1.group1.dev.example.com    tool2.group1.dev.example.com
 # Tools managed by Group 2

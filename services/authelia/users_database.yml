@@ -1,0 +1,40 @@
+---
+###############################################################
+#                         Users Database                      #
+###############################################################
+
+# This file can be used if you do not have an LDAP set up.
+
+# List of users
+#
+# Generate password with:
+#    docker run authelia/authelia authelia crypto hash generate argon2 --password $PASSWORD | sed 's/Digest: //g'
+users:
+  admin:
+    disabled: false
+    displayname: "Admin User"
+    # password is 'test'
+    password: "$argon2id$v=19$m=65536,t=3,p=4$ammtysoYCZQIY5xcxF6gHQ$KqscEWbFYzdO8vv3kzF7g2Nmrne0qjdmdobYUrU1nFY"
+    email: admin@example.com
+    groups:
+      - myhome
+      - admins
+  group1_user:
+    disabled: false
+    displayname: "General GROUP1 User"
+    # password is 'test'
+    password: "$argon2id$v=19$m=65536,t=3,p=4$8Duc6xBxO6rFgGvCL8DNLw$mi3c2+PbD5RG9Q6K7ORxls2uuNx8u//+5VdAUEgWn0Q"
+    email: group1user@example.com
+    groups:
+      - myhome
+      - group1
+  group2_user:
+    disabled: false
+    displayname: "General GROUP2 user"
+    # password is 'test'
+    password: "$argon2id$v=19$m=65536,t=3,p=4$XkIGHvov6nyXWLioKhIB2g$vWmCQQaUEyi82athel+xs8YMjn3ESUcFiWxZ+8uUqtk"
+    email: group2user@example.com
+    groups:
+      - myhome
+      - group2
+...
