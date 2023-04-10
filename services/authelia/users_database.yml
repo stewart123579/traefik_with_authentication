@@ -37,4 +37,24 @@ users:
     groups:
       - myhome
       - group2
+  group1_lead:
+    disabled: false
+    displayname: "GROUP1 lead"
+    # password is 'test'
+    password: "$argon2id$v=19$m=65536,t=3,p=4$ylVpMPetDCJnAVzx1DWfzA$hgjOkNuY2aZl/EvF7reoaR5omOlpZNMWUba4/U207Ks"
+    email: group1_lead@example.com
+    groups:
+      - myhome
+      - group1
+      - group1_lead
+  group1_sales:
+    disabled: false
+    displayname: "GROUP1 sales"
+    # password is 'test'
+    password: "$argon2id$v=19$m=65536,t=3,p=4$3GxOpKbp4DaxQEfxhELhOQ$40Ljd2aGmeWFRPtpUG5aogmP6R6DYq3rlwZIG7AY7Mg"
+    email: group1_sales@example.com
+    groups:
+      - myhome
+      - group1
+      - group1_sales
 ...

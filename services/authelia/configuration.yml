@@ -30,6 +30,9 @@ access_control:
     - domain: traefik.dev.example.com
       policy: one_factor
       subject: "group:admins"
+    - domain: shiny.group1.dev.example.com
+      policy: one_factor
+      subject: "group:group1"
     - domain: tool1.group1.dev.example.com
       policy: one_factor
       subject: "group:group1"

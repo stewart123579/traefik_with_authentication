@@ -117,6 +117,22 @@ services:
     restart: unless-stopped
 
 
+  shiny:
+    container_name: shiny
+    image: "test/shinyapp"
+    build:
+      context: ./images/shiny/.
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.shiny.rule=Host(`shiny.${GROUP1_DOMAIN}`)
+      - traefik.http.routers.shiny.entrypoints=https
+      - traefik.http.routers.shiny.tls=true
+      - traefik.docker.network=traefik-public
+      - traefik.http.routers.shiny.middlewares=authelia@docker
+    networks:
+      - traefik-public
+
+
   tool1:
     image: "brndnmtthws/nginx-echo-headers"
     container_name: "tool1"

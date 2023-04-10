@@ -85,6 +85,11 @@ services:
   - name: "Group1 Solutions"
     icon: "fas fa-skull-crossbones"
     items:
+      - name: "File upload demo"
+        logo: "assets/tools/confluence.svg"
+        subtitle: "(group1 only with user access differences)"
+        tag: "group1"
+        url: "https://shiny.group1.dev.example.com"
       - name: "Fancy tool 1"
         logo: "assets/tools/jupyter.svg"
         subtitle: "View request headers (group1 only)"

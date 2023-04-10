@@ -7,9 +7,11 @@ The intent is to have a common landing page, but capabilities provided by differ
 This is using [[https://www.authelia.com/][Authelia]] to provide authentication.  To use another SSO tool, you will need to edit the [[https://traefik.io/][Traefik]] configurations.
 
 * The site
+
 Once you have this running visit https://dev.example.com/
 
 * Tools
+
 This setup uses the following tools.  However, don't worry, the *Docker containers* are automatically downloaded, nothing is installed on your machine.
 
 - [[https://traefik.io/][Traefik]] :: Traefik is a leading modern reverse proxy and load balancer that makes deploying microservices easy
@@ -30,12 +32,14 @@ Add the following hosts:
 # Admin related sites
 127.0.0.1       dev.example.com                 traefik.dev.example.com         authelia.dev.example.com
 # Tools managed by Group 1
-127.0.0.1       tool1.group1.dev.example.com    tool2.group1.dev.example.com
+127.0.0.1       tool1.group1.dev.example.com    tool2.group1.dev.example.com    shiny.group1.dev.example.com
 # Tools managed by Group 2
 127.0.0.1       rapid.group2.dev.example.com    mineit.group2.dev.example.com
 #+end_example
 
-* Add users
+* Users
+
+** Add users
 
 Sample user accounts are set in =services/authelia/users_database.yml=.
 
@@ -58,8 +62,18 @@ Generate hashed password information with the following command:
   docker run authelia/authelia authelia crypto hash generate argon2 --password $PASSWORD | sed 's/Digest: //g'
 #+end_src
 
+** See what users exist
+
+I sometimes (often!) forget what sample users I've set up and the associated groups.  So I use this command:
+
+#+begin_src shell
+  grep -ve '#' -e '^    password\|email\|disabled:' services/authelia/users_database.yml
+#+end_src
+
 * Start/stop/observe the environment
+
 ** Run this ONLY ONCE
+
 Initially you will need to set up a couple of Docker related things.  Firstly the internal network that containers will use to communicate with each other:
 
 #+begin_src shell
@@ -72,8 +86,10 @@ Then a volume (think virtual disk) for [[https://github.com/bastienwirtz/homer][
   docker volume create --name=homer_assets
 #+end_src
 
-You will only need to run the above commands once
+You will only need to run the above commands once.
+
 ** Regular running commands
+
 Starting the docker environment is as simple as
 #+begin_src shell
   docker-compose up -d
@@ -89,6 +105,31 @@ Finally, stopping is
   docker-compose down
 #+end_src
 
+* Security
+
+You'll undoubtedly get lots and lots and lots of =Warning: Potential Security Risk Ahead= warnings with this set up.  It's because we're using self-signed certificates for the HTTPS and your browser (rightly!) is making sure you're not being tricked.  Just ignore them for any of the =dev.example.com= sites (or whatever you decide to use).
+
+When moving to a more production deployment either use a wild-card certificate from your provider, or - my preference - use [[https://letsencrypt.org/][Let's Encrypt]].
+
+
+Also, this example is just that, an example.  You need to understand the various settings and change default settings (like the Authelia ~jwt_secret~) before exposing this setup too broadly.
+
+* Shiny example
+
+There is a quick-and-dirty example in R Shiny for setting up user level access - the upload capability is heavily based on the Shiny demo.  This user level authentication is easily reproduced in other languages.  Please don't judge my R coding, judge the language.
+
+The example has four levels of access based on the =Remote-Groups= HTTP header (visit [[https://tool1.group1.dev.example.com][Tool 1]] to see the headers).
+
+/HINT: You should probably configure the setup to ensure that the =Remote-Groups= has been only sourced from the authentication server.../
+
+If the logged in user is:
+- not a member of ~group1~ :: No access
+- a member of ~group1~ :: limited access, imagine a demo
+- a member of ~group1_lead~ :: broad leadership access
+- a member of ~group1_sales~ :: you can play around with a file upload example
+
+
+I've also included the ~rocks.csv~ file from the Shiny download demo in case you don't have a CSV file handy.
 * Configuration files
 
 If you want to play around with the configuration the following files will be of interest
@@ -98,3 +139,21 @@ If you want to play around with the configuration the following files will be of
 - =services/homer/config.yml= :: Configuration for the homepage
 - =services/authelia/users_database.yml= :: Add users for the demo
 - =services/authelia/configuration.yml= :: Configure access to the various hosts
+
+* LICENCE
+
+The manjority of code in ~app.R~ and the file ~rocks.csv~ are sourced from the [[https://shiny.rstudio.com][R Shiny]] package and are under the GPL v3 licence.
+
+The rest of this is released under the MIT Licence, with the additional restriction that it is NOT to be used in any way (e.g. but not limited to either code or metadata) as input for training or testing commercial machine learning related activities - so no CoPilot, OpenAI, etc. - unless specifically approved by the copyright holder(s).
+
+
+Copyright © 2023 Stewart V. Wright <stewart@vifortech.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+ADDITIONAL restriction:
+This software is NOT to be used in any way (e.g. but not limited to either code or metadata) as input for training or testing commercial machine learning related activities unless specifically approved by the copyright holder(s).
